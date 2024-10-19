@@ -1,6 +1,8 @@
 var userModel = require('./userModel');
 var key = '123456789trytryrtry';
 var encryptor = require('simple-encryptor')(key);
+const jwt = require('jsonwebtoken');
+const secretKey = 'H76*dh@2#klJHE12%$32@f&!dsLpsak'; // Remplace par ta clé secrète pour le JWT
 
 module.exports.createUserDBService = (userDetails) => {
     return new Promise(async function myFn(resolve, reject) {
@@ -29,14 +31,23 @@ module.exports.createUserDBService = (userDetails) => {
 module.exports.loginUserDBService = (userDetails) => {
     return new Promise(async function myFn(resolve, reject) {
         try {
-            // Utilisation de `await` avec `findOne()` pour récupérer l'utilisateur
             const result = await userModel.findOne({ email: userDetails.email });
 
-            // Vérification si un utilisateur a été trouvé et si le mot de passe est correct
             if (result) {
                 var decrypted = encryptor.decrypt(result.password);
                 if (decrypted === userDetails.password) {
-                    resolve({ status: true, msg: "User validated successfully" });
+                    // Génération du token
+                    const token = jwt.sign(
+                        { userId: result._id, email: result.email },
+                        secretKey,
+                        { expiresIn: '1h' } // Le token expire dans 1 heure
+                    );
+                    
+                    resolve({
+                        status: true,
+                        msg: "User validated successfully",
+                        token: token // Retourne le token avec la réponse
+                    });
                 } else {
                     reject({ status: false, msg: "User validation failed" });
                 }
@@ -49,4 +60,7 @@ module.exports.loginUserDBService = (userDetails) => {
         }
     });
 };
+
+
+
   

@@ -28,7 +28,7 @@ var createUserControllerFn =async (req,res)=>
        
        
         if(result.status){
-            res.send({"status":true,"message":result.msg});
+            res.send({"status":true,"message":result.msg,"token":result.token});
         }else{
             res.send({"status":false,"message":result.msg});
         }
