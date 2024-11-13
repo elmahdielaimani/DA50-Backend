@@ -46,7 +46,8 @@ module.exports.loginUserDBService = (userDetails) => {
                     resolve({
                         status: true,
                         msg: "User validated successfully",
-                        token: token // Retourne le token avec la réponse
+                        token: token ,// Retourne le token avec la réponse
+                        userId: result._id // Retourne l'ID de l'utilisateur
                     });
                 } else {
                     reject({ status: false, msg: "User validation failed" });
@@ -61,6 +62,34 @@ module.exports.loginUserDBService = (userDetails) => {
     });
 };
 
+
+module.exports.getUserFromDBService = async (id) => {
+    try {
+        const result = await userModel.findById(id);
+        return result;
+    } catch (error) {
+        return false;
+    }
+};
+
+
+
+module.exports.updateUserDBService = async (id, userDetails) => {
+    try {
+        // Vérifier si le mot de passe est présent dans les détails de l'utilisateur
+        if (userDetails.password) {
+            // Chiffrer le mot de passe
+            userDetails.password = encryptor.encrypt(userDetails.password);
+        }
+
+        // Mettre à jour les informations de l'utilisateur
+        const result = await userModel.findByIdAndUpdate(id, userDetails, { new: true });
+        return result;
+    } catch (error) {
+        console.error('Error updating user:', error);
+        return false;
+    }
+};
 
 
   
