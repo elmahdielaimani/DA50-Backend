@@ -6,6 +6,7 @@ mongoose.set('strictQuery',false);
 
 var routes =require('./route/routes');
 const cors =require('cors');
+multer   = require('multer');
 
 
 app.use(cors(
@@ -37,6 +38,9 @@ async function connectToDatabase() {
 }
 
 connectToDatabase();
+app.use('/images' , express.static('images'));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+const bodyParser = require('body-parser');
 app.use(routes);
