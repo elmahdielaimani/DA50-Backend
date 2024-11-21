@@ -13,12 +13,21 @@ var userSchema= new schema({
 
     email:{
         type:String,
-        required:true
+        required:true,
+        unique:true
     },
 
     password:{
         type:String,
         required:true
     },
+
+    
+    role: {
+        type: String,
+        enum: ['user', 'administrator'], // Only allow 'user' or 'administrator'
+        default: 'user' // Default to 'user' for new users
+    },
+
 });
 module.exports=mongoose.model('user',userSchema)

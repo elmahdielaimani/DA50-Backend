@@ -179,6 +179,10 @@ router.put('/image/update/:id', upload.single('image'), async (req, res) => {
 
 router.route('/user/login').post(userController.loginUserControllerFn);
 router.route('/user/create').post(userController.createUserControllerFn);
+router.route('/user/list').get(userController.getAllUsersControllerFn); //to display all users
+router.route('/user/user-info/:email').get(userController.getUserControllerFn1); //to display user info
+router.route('/user/update-role').post(userController.updateUserRoleControllerFn);
+router.route('/user/delete-user').post(userController.deleteUserControllerFn);
 router.route('/user/update/:id').patch(userController.updateUserControllerFn);
 router.route('/user/getUser/:id').get(userController.getUserControllerFn);
 

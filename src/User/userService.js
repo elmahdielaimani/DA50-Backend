@@ -12,6 +12,7 @@ module.exports.createUserDBService = (userDetails) => {
             userModelData.firstname = userDetails.firstname;
             userModelData.lastname = userDetails.lastname;
             userModelData.email = userDetails.email;
+           
 
             // Encrypt the password
             var encrypted = encryptor.encrypt(userDetails.password);
@@ -62,6 +63,23 @@ module.exports.loginUserDBService = (userDetails) => {
     });
 };
 
+module.exports.updateUserRoleDBService = async (userDetails) => {
+    try {
+        const user = await userModel.findOneAndUpdate(
+            { email: userDetails.email },  // Find the user by email
+            { role: userDetails.role },     // Update the role
+            { new: true }       // Return the updated document
+        );
+
+        if (!user) {
+            return { status: false, message: 'User not found' };
+        }
+        return { status: true, message: 'User role updated successfully' };
+    } catch (error) {
+        console.error('Error updating user role:', error);
+        throw new Error('Failed to update user role');
+    }
+};
 
 module.exports.getUserFromDBService = async (id) => {
     try {
@@ -71,8 +89,6 @@ module.exports.getUserFromDBService = async (id) => {
         return false;
     }
 };
-
-
 
 module.exports.updateUserDBService = async (id, userDetails) => {
     try {
@@ -91,5 +107,35 @@ module.exports.updateUserDBService = async (id, userDetails) => {
     }
 };
 
+module.exports.deleteUserDBService = async (email) => {
+    try{
+        const user = await userModel.deleteOne(
+            {email: email}
+        )
+    }
+    catch (error) {
+        console.error('Error deleting users:', error);
+        throw new Error('Failed to delete user');
+    }
+}
 
-  
+module.exports.getAllUsersDBService = async () => {
+    try {
+        const users = await userModel.find({}); // Fetch all users from the database
+        return users; // Return the fetched users (automatically wrapped in a Promise)
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw new Error('Failed to fetch users'); // Throw an error to be caught by the caller
+    }
+};
+
+module.exports.getUserByEmailDBService = async (email) => {
+    console.log(email)
+    try {
+        const user = await userModel.findOne({ email: email }); // Find a single user by email
+        return user; // Return the found user (automatically wrapped in a Promise)
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        throw new Error('Failed to fetch user'); // Throw an error to be caught by the caller
+    }
+};

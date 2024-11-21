@@ -23,14 +23,9 @@ else
     console.log("started")
 });
 
-
-
-
-
-
 async function connectToDatabase() {
     try {
-        await mongoose.connect('mongodb://localhost:27017/DA50');
+        await mongoose.connect('mongodb://localhost:27017/DA50-Database');
         console.log('Connected to the database');
     } catch (error) {
         console.error('Error connecting to the database', error);
