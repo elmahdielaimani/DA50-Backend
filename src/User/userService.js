@@ -109,9 +109,11 @@ module.exports.updateUserDBService = async (id, userDetails) => {
 
 module.exports.deleteUserDBService = async (email) => {
     try{
+        console.log(email);
         const user = await userModel.deleteOne(
             {email: email}
         )
+        return user;
     }
     catch (error) {
         console.error('Error deleting users:', error);

@@ -52,7 +52,7 @@ var updateUserRoleControllerFn = async (req, res) => {
 var deleteUserControllerFn = async (req, res) => {
     try{
         console.log('Deleting user');
-        var user = await userService.deleteUserDBService(req.body);
+        var user = await userService.deleteUserDBService(req.body.email);
         console.log('User has been deleted :', user);
         res.send({ status: true, message: "Deleting user"})
     }
