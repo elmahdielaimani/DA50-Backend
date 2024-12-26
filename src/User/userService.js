@@ -92,10 +92,12 @@ module.exports.getUserFromDBService = async (id) => {
 
 module.exports.updateUserDBService = async (id, userDetails) => {
     try {
-        // Vérifier si le mot de passe est présent dans les détails de l'utilisateur
-        if (userDetails.password) {
-            // Chiffrer le mot de passe
+        // Si le mot de passe est fourni et non vide, on le chiffre
+        if (userDetails.password && userDetails.password.trim() !== '') {
             userDetails.password = encryptor.encrypt(userDetails.password);
+        } else {
+            // Supprimez le champ password pour éviter de le mettre à jour
+            delete userDetails.password;
         }
 
         // Mettre à jour les informations de l'utilisateur

@@ -34,13 +34,13 @@ async function connectToDatabase() {
 // Script pour importer les données
 async function seedDatabase() {
   const imagesDirectory = path.join(__dirname, 'assets/images'); // Chemin vers les images
-  const jsonDirectory = path.join(__dirname, 'assets/json'); // Chemin vers les fichiers JSON
+  const jsonDirectory = path.join(__dirname, 'assets/json'); // Chemin vers les JSON
 
   try {
     const imageFiles = fs.readdirSync(imagesDirectory);
     const jsonFiles = fs.readdirSync(jsonDirectory);
 
-    const bulkOperations = [];
+    const bulkOperations = []; // Tableau pour stocker les opérations en bulk
 
     for (const jsonFile of jsonFiles) {
       const jsonFilePath = path.join(jsonDirectory, jsonFile);
@@ -53,29 +53,37 @@ async function seedDatabase() {
       );
 
       if (matchingImage) {
-        const imagePath = path.join(imagesDirectory, matchingImage);
         const imageUrl = `http://localhost:${PORT}/images/${matchingImage}`;
 
-        const newImage = {
-          nom: baseName, // Utiliser le préfixe comme nom
-          image: imageUrl,
-          metadata: {
-            imgHeight: jsonData.imgHeight,
-            imgWidth: jsonData.imgWidth,
-            objects: jsonData.objects,
+        // Ajouter une opération bulk pour une nouvelle image
+        bulkOperations.push({
+          updateOne: {
+            filter: { nom: baseName }, // Vérifier si l'image existe déjà
+            update: {
+              $setOnInsert: {
+                nom: baseName,
+                image: imageUrl,
+                metadata: {
+                  imgHeight: jsonData.imgHeight,
+                  imgWidth: jsonData.imgWidth,
+                  objects: jsonData.objects,
+                },
+              },
+            },
+            upsert: true, // Insérer uniquement si l'image n'existe pas
           },
-        };
-
-        bulkOperations.push({ insertOne: { document: newImage } });
-        console.log(`Matched and added: ${jsonFile} with ${matchingImage}`);
+        });
       } else {
         console.error(`No matching image found for JSON: ${jsonFile}`);
       }
     }
 
+    // Effectuer toutes les opérations en bulk
     if (bulkOperations.length > 0) {
-      await Image.collection.bulkWrite(bulkOperations);
-      console.log('All data inserted successfully!');
+      
+      const result = await Image.collection.bulkWrite(bulkOperations);
+      console.log(`Bulk operation completed: ${result.insertedCount || 0} images inserted, ${result.modifiedCount || 0} images updated.`);
+
     } else {
       console.log('No data to insert.');
     }
@@ -83,6 +91,7 @@ async function seedDatabase() {
     console.error('Error seeding database:', error);
   }
 }
+
 
 // Appel de la fonction au démarrage
 connectToDatabase().then(() => {
