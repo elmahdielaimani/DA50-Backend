@@ -4,15 +4,30 @@ var Image = require('../src/Image/imageModel.js');
 var userController = require('../src/User/userController.js');
 
 
-// Route GET avec pagination
+
+
+// Route GET avec pagination et filtrage par rôle
 router.get('/image', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; // Page demandée, par défaut 1
     const limit = parseInt(req.query.limit) || 10; // Limite par page, par défaut 10
-
     const skip = (page - 1) * limit; // Calculer le décalage
-    const total = await Image.countDocuments(); // Nombre total d'images
-    const images = await Image.find().skip(skip).limit(limit); // Récupérer les images avec pagination
+
+    const role = req.headers['role']; // Le rôle est récupéré depuis les headers
+
+    if (!role) {
+      return res.status(400).send({ error: 'Role is required in the headers' });
+    }
+
+    // Filtrer les images en fonction du rôle
+    const filter = role === 'administrator'
+      ? { isAnnotated: true }
+      : role === 'utilisateur'
+      ? { isAnnotated: false }
+      : {}; // Aucun filtre si le rôle n'est pas valide
+
+    const total = await Image.countDocuments(filter); // Nombre total d'images correspondant au filtre
+    const images = await Image.find(filter).skip(skip).limit(limit); // Récupérer les images filtrées avec pagination
 
     res.status(200).json({
       images,
@@ -24,6 +39,7 @@ router.get('/image', async (req, res) => {
     res.status(500).send({ error: 'Erreur lors de la récupération des images' });
   }
 });
+
 
 
 // Route pour récupérer une image spécifique
