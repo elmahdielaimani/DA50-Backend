@@ -39,7 +39,7 @@ module.exports.loginUserDBService = (userDetails) => {
                 if (decrypted === userDetails.password) {
                     // Génération du token
                     const token = jwt.sign(
-                        { userId: result._id, email: result.email },
+                        { userId: result._id, email: result.email, role: result.role },
                         secretKey,
                         { expiresIn: '1h' } // Le token expire dans 1 heure
                     );
@@ -47,8 +47,9 @@ module.exports.loginUserDBService = (userDetails) => {
                     resolve({
                         status: true,
                         msg: "User validated successfully",
-                        token: token ,// Retourne le token avec la réponse
-                        userId: result._id // Retourne l'ID de l'utilisateur
+                        token: token, // Retourne le token avec la réponse
+                        userId: result._id, // Retourne l'ID de l'utilisateur
+                        role: result.role // Retourne le rôle de l'utilisateur
                     });
                 } else {
                     reject({ status: false, msg: "User validation failed" });
@@ -62,6 +63,8 @@ module.exports.loginUserDBService = (userDetails) => {
         }
     });
 };
+
+
 
 module.exports.updateUserRoleDBService = async (userDetails) => {
     try {

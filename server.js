@@ -68,6 +68,8 @@ async function seedDatabase() {
                   imgWidth: jsonData.imgWidth,
                   objects: jsonData.objects,
                 },
+                id_utilisateur: null, // Par défaut, aucune annotation utilisateur
+                isAnnotated: false, // Par défaut, non annotée
               },
             },
             upsert: true, // Insérer uniquement si l'image n'existe pas
@@ -80,17 +82,17 @@ async function seedDatabase() {
 
     // Effectuer toutes les opérations en bulk
     if (bulkOperations.length > 0) {
-      
       const result = await Image.collection.bulkWrite(bulkOperations);
-      console.log(`Bulk operation completed: ${result.insertedCount || 0} images inserted, ${result.modifiedCount || 0} images updated.`);
-
+      console.log(`Bulk operation completed successfully.`); // Message simplifié sans nombres
     } else {
       console.log('No data to insert.');
     }
+    
   } catch (error) {
     console.error('Error seeding database:', error);
   }
 }
+
 
 
 // Appel de la fonction au démarrage

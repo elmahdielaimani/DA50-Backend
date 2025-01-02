@@ -25,7 +25,7 @@ var loginUserControllerFn = async (req, res) => {
 
 
         if (result.status) {
-            res.send({ "status": true, "message": result.msg, "token": result.token, "userId": result.userId });
+            res.send({ "status": true, "message": result.msg, "token": result.token, "userId": result.userId,"role": result.role });
         } else {
             res.send({ "status": false, "message": result.msg });
         }
