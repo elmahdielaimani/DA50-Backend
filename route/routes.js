@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 
+var userController = require('../src/User/userController.js');
 
 // Route GET avec pagination et filtrage par rôle
 router.get('/image', async (req, res) => {
@@ -74,7 +75,7 @@ router.post('/image/annotations', async (req, res) => {
     image.metadata.objects = objects.map(obj => ({
       label: obj.label,
       polygon: obj.polygon,
-      importanceLevel: obj.importanceLevel || 'medium',
+      importanceLevel: obj.importanceLevel || '',
       comment: obj.comment || ''
     }));
 
@@ -87,4 +88,14 @@ router.post('/image/annotations', async (req, res) => {
     res.status(500).json({ error: 'Failed to save annotations: ' + error.message });
   }
 });
+// Routes utilisateur
+router.route('/user/login').post(userController.loginUserControllerFn);
+router.route('/user/create').post(userController.createUserControllerFn);
+router.route('/user/list').get(userController.getAllUsersControllerFn); // Affiche tous les utilisateurs
+router.route('/user/user-info/:email').get(userController.getUserControllerFn1); // Affiche les infos utilisateur par email
+router.route('/user/update-role').post(userController.updateUserRoleControllerFn);
+router.route('/user/delete-user').post(userController.deleteUserControllerFn);
+router.route('/user/update/:id').patch(userController.updateUserControllerFn);
+router.route('/user/getUser/:id').get(userController.getUserControllerFn);
+
 module.exports = router;
