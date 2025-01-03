@@ -23,7 +23,7 @@ router.get('/image', async (req, res) => {
     // Filtrer les images en fonction du rôle
     const filter = role === 'administrator'
       ? { isAnnotated: true }
-      : role === 'utilisateur'
+      : role === 'user'
       ? { isAnnotated: false }
       : {}; // Aucun filtre si le rôle n'est pas valide
 
@@ -83,7 +83,7 @@ router.post('/image/annotations', async (req, res) => {
 
     // Mettre à jour le champ userId et isAnnotated
     image.id_utilisateur = userId; // Utilisation de l'ID utilisateur envoyé dans la requête
-    image.isAnnotated = true;
+    image.isAnnotated =true;
 
     // Enregistrer les modifications dans la base de données
     await image.save();
