@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const objectSchema = new mongoose.Schema({
   label: { type: String, required: true },
   polygon: { type: [[Number]], required: true },
+  comment: { type: String, default: '' }, // Champ pour les commentaires
+  importanceLevel: { type: String, default: '' }, // Champ pour la priorité
 });
 
 // Schéma principal pour les images

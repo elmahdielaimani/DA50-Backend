@@ -60,18 +60,20 @@ router.get('/image/:id', async (req, res) => {
 // Save annotations
 router.post('/image/annotations', async (req, res) => {
   try {
-    const { imageId, objects } = req.body;
+    const { imageId, userId, objects } = req.body; // Récupération de l'ID utilisateur depuis le body
 
-    if (!imageId || !objects) {
+    // Vérifier les champs requis
+    if (!imageId || !userId || !objects) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Récupérer l'image par son ID
     const image = await Image.findById(imageId);
     if (!image) {
       return res.status(404).json({ error: 'Image not found' });
     }
 
-    // Update the image document with new annotations
+    // Mettre à jour les annotations de l'image
     image.metadata.objects = objects.map(obj => ({
       label: obj.label,
       polygon: obj.polygon,
@@ -79,7 +81,11 @@ router.post('/image/annotations', async (req, res) => {
       comment: obj.comment || ''
     }));
 
-    // Save the updated image document
+    // Mettre à jour le champ userId et isAnnotated
+    image.id_utilisateur = userId; // Utilisation de l'ID utilisateur envoyé dans la requête
+    image.isAnnotated = true;
+
+    // Enregistrer les modifications dans la base de données
     await image.save();
 
     res.status(200).json({ message: 'Annotations saved successfully' });
@@ -88,6 +94,8 @@ router.post('/image/annotations', async (req, res) => {
     res.status(500).json({ error: 'Failed to save annotations: ' + error.message });
   }
 });
+
+
 // Routes utilisateur
 router.route('/user/login').post(userController.loginUserControllerFn);
 router.route('/user/create').post(userController.createUserControllerFn);
