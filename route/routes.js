@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Image = require('../src/Image/imageModel.js');
+const User = require('../src/User/userModel.js');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -57,10 +59,9 @@ router.get('/image/:id', async (req, res) => {
   }
 });
 
-// Save annotations
 router.post('/image/annotations', async (req, res) => {
   try {
-    const { imageId, userId, objects } = req.body; // Récupération de l'ID utilisateur depuis le body
+    const { imageId, userId, objects } = req.body; // Récupération des données envoyées
 
     // Vérifier les champs requis
     if (!imageId || !userId || !objects) {
@@ -73,19 +74,31 @@ router.post('/image/annotations', async (req, res) => {
       return res.status(404).json({ error: 'Image not found' });
     }
 
+    // Vérifier si l'image n'a jamais été annotée
+    if (!image.isAnnotated) {
+      // Marquer l'image comme annotée pour la première fois
+      image.isAnnotated = true;
+      image.id_utilisateur = userId;
+
+      // Incrémenter le nombre d'images annotées pour l'utilisateur
+      const user = await User.findById(userId);
+      if (user) {
+        user.numberOfAnnotatedImages = (user.numberOfAnnotatedImages || 0) + 1; // Initialiser si non défini et incrémenter
+        await user.save(); // Sauvegarder les modifications sur l'utilisateur
+      } else {
+        return res.status(404).json({ error: 'User not found' });
+      }
+    }
+
     // Mettre à jour les annotations de l'image
-    image.metadata.objects = objects.map(obj => ({
+    image.metadata.objects = objects.map((obj) => ({
       label: obj.label,
       polygon: obj.polygon,
       importanceLevel: obj.importanceLevel || '',
-      comment: obj.comment || ''
+      comment: obj.comment || '',
     }));
 
-    // Mettre à jour le champ userId et isAnnotated
-    image.id_utilisateur = userId; // Utilisation de l'ID utilisateur envoyé dans la requête
-    image.isAnnotated =true;
-
-    // Enregistrer les modifications dans la base de données
+    // Sauvegarder les modifications sur l'image
     await image.save();
 
     res.status(200).json({ message: 'Annotations saved successfully' });
@@ -94,6 +107,7 @@ router.post('/image/annotations', async (req, res) => {
     res.status(500).json({ error: 'Failed to save annotations: ' + error.message });
   }
 });
+
 
 
 // Routes utilisateur
